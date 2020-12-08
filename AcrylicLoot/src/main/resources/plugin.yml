@@ -1,0 +1,6 @@
+name: AcrylicLoot
+version: ${project.version}
+main: com.acrylic.acrylicloot.AcrylicLoot
+api-version: 1.16
+authors: [ Acrylic ]
+description: Main module.

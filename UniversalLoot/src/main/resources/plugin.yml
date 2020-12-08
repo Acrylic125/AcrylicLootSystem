@@ -1,0 +1,6 @@
+name: UniversalLoot
+version: ${project.version}
+main: com.acrylic.universalloot.UniversalLoot
+api-version: 1.16
+authors: [ Acrylic ]
+description: Universal Module.
