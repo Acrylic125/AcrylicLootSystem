@@ -1,17 +1,26 @@
 package com.acrylic.candy;
 
+import com.acrylic.math.ProbabilityKt;
 import com.acrylic.universal.Universal;
 import com.acrylic.universal.animations.IndexedAnimation;
+import com.acrylic.universal.animations.dangle.Dangle;
+import com.acrylic.universal.animations.holograms.Holograms;
+import com.acrylic.universal.animations.rotational.HandRotationAnimation;
+import com.acrylic.universal.entityanimations.entities.ArmorStandAnimator;
+import com.acrylic.universal.renderer.PacketRenderer;
 import com.acrylic.universal.renderer.PlayerRenderer;
 import com.acrylic.universalloot.animationframes.AnimationFrame;
 import com.acrylic.universalloot.animationframes.AnimationFrames;
 import com.acrylic.version_1_8.entity.EntityEquipmentBuilder;
 import com.acrylic.version_1_8.entityanimator.NMSArmorStandAnimator;
 import com.acrylic.version_1_8.items.ItemBuilder;
+import com.acrylic.version_1_8.particles.Particles;
+import net.minecraft.server.v1_8_R3.EnumParticle;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +31,7 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
             .addFrame(new AnimationFrame<>(0, 10, (animation, frame) -> animation.addToLocation(0, animation.calculateDeltaAccelerate(frame.getMaxIndex(), 0.1f, 4.5f, frame.getMaxIndex() - frame.getInitialIndex()), 0)))
             .addFrame(new AnimationFrame<>(10, 20, (animation, frame) -> {
                 animation.addToLocation(0, animation.calculateDeltaDecelerate(frame.getMaxIndex(), -0.1f, -4.5f, frame.getMaxIndex() - frame.getInitialIndex()), 0);
-                animation.playChestLand1(frame);
+                animation.playChestLand(frame);
             }))
             .addFrame(new AnimationFrame<>(20, 40, (animation, frame) -> {
                 animation.playChestShake();
@@ -31,7 +40,7 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
             .addFrame(new AnimationFrame<>(40, 47, (animation, frame) -> animation.addToLocation(0, animation.calculateDeltaAccelerate(frame.getMaxIndex(), 0.05f, 2.5f, frame.getMaxIndex() - frame.getInitialIndex()), 0)))
             .addFrame(new AnimationFrame<>(47, 54, (animation, frame) -> {
                 animation.addToLocation(0, animation.calculateDeltaDecelerate(frame.getMaxIndex(), -0.05f, -2.5f, frame.getMaxIndex() - frame.getInitialIndex()), 0);
-                animation.playChestLand1(frame);
+                animation.playChestLand(frame);
             }))
             .addFrame(new AnimationFrame<>(58, 74, (animation, frame) -> {
                 animation.playChestShake();
@@ -50,7 +59,7 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
             .addFrame(new AnimationFrame<>(140, 145, (animation, frame) -> animation.addToLocation(0, animation.calculateDeltaAccelerate(frame.getMaxIndex(), 0.2f, 7, frame.getMaxIndex() - frame.getInitialIndex()), 0)))
             .addFrame(new AnimationFrame<>(155, 160, (animation, frame) -> {
                 animation.addToLocation(0, animation.calculateDeltaDecelerate(frame.getMaxIndex(), -0.2f, -7, frame.getMaxIndex() - frame.getInitialIndex()), 0);
-                animation.playChestLand1(frame);
+                animation.playChestLand(frame);
             }))
             ;
 
@@ -78,9 +87,10 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if (hasEnded())
+                if (hasEnded()) {
                     cancel();
-                else
+                    endAnimation();
+                } else
                     update();
             }
         }.runTaskTimer(Universal.getPlugin(), 1, 1);
@@ -152,10 +162,11 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
         }
     }
 
-    private void playChestLand1(@NotNull AnimationFrame<CandyCrateAnimation> frame) {
+    private void playChestLand(@NotNull AnimationFrame<CandyCrateAnimation> frame) {
         int index = getIndex();
         Player player = getCandyCrateProcess().getPlayer();
         if (index == frame.getMaxIndex()) {
+            animateCandyStrong();
             player.playSound(player.getLocation(), Sound.ZOMBIE_WOODBREAK, 1f, 1.2f);
         }
     }
@@ -163,20 +174,79 @@ public abstract class CandyCrateAnimation extends IndexedAnimation {
     private void playChestShake() {
         int index = getIndex();
         Player player = getCandyCrateProcess().getPlayer();
-        if (index % 3 == 0)
+        if (index % 3 == 0) {
             player.playSound(player.getLocation(), Sound.ZOMBIE_WOOD, 1f, 0.2f);
+            animateCandyWeak();
+        }
     }
-
     private void playChestShakeAggressive(@NotNull AnimationFrame<CandyCrateAnimation> frame) {
         int index = getIndex();
         Player player = getCandyCrateProcess().getPlayer();
         if (index % 3 == 0) {
             float pitch = (getIndex() - frame.getInitialIndex()) / (float) frame.getMaxIndex();
             player.playSound(player.getLocation(), Sound.ZOMBIE_WOOD, 1f, 0.2f + (pitch * 1.6f));
+            animateCandyWeak();
         }
         if (index == frame.getMaxIndex()) {
             player.playSound(player.getLocation(), Sound.WITHER_SHOOT, 1f, 0.6f);
         }
+    }
+
+    private void animateCandyWeak() {
+        animateCandy(1, 2);
+    }
+
+    private void animateCandyStrong() {
+        animateCandy(11, 15);
+    }
+
+    private void animateCandy(int a1, int a2) {
+        new CandyAnimator(animator.getRenderer(), animator.getLocation().add(0, 1, 0), ProbabilityKt.getRandom(a1, a2));
+    }
+
+    private void endAnimation() {
+        Location location = animator.getLocation().add(0, 2.5f, 0);
+        Particles particles = new Particles()
+                .location(location)
+                .amount(40)
+                .particleType(EnumParticle.SMOKE_LARGE)
+                .speed(0.1f);
+        particles.build();
+        animator.getRenderer().send(particles);
+        generateItem();
+    }
+
+    private void generateItem() {
+        candyCrateProcess.reward();
+        final HandRotationAnimation[] animators = new HandRotationAnimation[candyCrateProcess.getRewards().size()];
+        final Location location = animator.getLocation();
+        int i = 0;
+        for (ItemStack reward : candyCrateProcess.getRewards()) {
+            ArmorStandAnimator itemAnimator = new ArmorStandAnimator(animator.getLocation());
+            itemAnimator.asAnimator().setEquipment(new EntityEquipmentBuilder().setItemInHand(reward));
+            HandRotationAnimation handRotationAnimation = new HandRotationAnimation(itemAnimator);
+            Holograms holograms = new Holograms();
+            holograms.addHologram(animator.getLocation(), 2, reward.getItemMeta().getDisplayName());
+            handRotationAnimation.setHologram(holograms);
+            animators[i] = handRotationAnimation;
+            i++;
+        }
+        final Player player = candyCrateProcess.getPlayer();
+        new BukkitRunnable() {
+            int i = 0;
+            @Override
+            public void run() {
+                if (i >= 100) {
+                    cancel();
+                    for (HandRotationAnimation animator : animators)
+                        animator.delete();
+                } else {
+                    for (HandRotationAnimation animator : animators)
+                        animator.teleportWithHolograms(location);
+                }
+                i++;
+            }
+        }.runTaskTimer(Universal.getPlugin(), 1, 1);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.acrylic.acrylicloot;
 
+import com.acrylic.candy.CandyAnimator;
 import com.acrylic.candy.CandyCondensedCrate;
 import com.acrylic.candy.CandyLootCrate;
 import com.acrylic.candy.CandyLootItem;
@@ -9,6 +10,10 @@ import com.acrylic.universal.UniversalNMS;
 import com.acrylic.universal.command.AbstractCommandExecuted;
 import com.acrylic.universal.command.CommandBuilder;
 import com.acrylic.universal.events.EventBuilder;
+import com.acrylic.universal.renderer.PredicateRenderer;
+import com.acrylic.universal.shapes.lines.BaseLine;
+import com.acrylic.universal.shapes.lines.QuadraticYLine;
+import com.acrylic.universalloot.PlayerRenderer;
 import com.acrylic.universalloot.preview.SimpleLootPreview;
 import com.acrylic.version_1_8.EntityRegistry;
 import com.acrylic.version_1_8.items.ItemBuilder;
@@ -46,6 +51,12 @@ public final class AcrylicLoot extends JavaPlugin {
                     Player sender = (Player) commandExecuted.getSender();
                     candyLootCrates.open(sender);
         }).register();
+        CommandBuilder.create("candy")
+                .filter(AbstractCommandExecuted::isPlayer)
+                .handle(abstractCommandExecuted -> {
+                    Player sender = (Player) abstractCommandExecuted.getSender();
+                    CandyAnimator candyAnimator = new CandyAnimator(new PlayerRenderer(sender), sender.getLocation(), 10);
+                }).register();
 
     }
 
