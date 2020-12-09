@@ -84,11 +84,6 @@
         </dependency>
         <dependency>
             <groupId>com.acrylic</groupId>
-            <artifactId>LootVersion_1_8</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.acrylic</groupId>
             <artifactId>Candy</artifactId>
             <version>1.0</version>
         </dependency>

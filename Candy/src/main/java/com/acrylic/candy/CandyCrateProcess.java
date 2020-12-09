@@ -17,10 +17,12 @@ public class CandyCrateProcess implements LootProcess {
     private final Player player;
     private final Loot loot;
     private final List<ItemStack> rewards;
+    private final CandyCrateAnimation candyCrateAnimation;
 
     public CandyCrateProcess(@NotNull Player player, @NotNull Loot loot) {
         this.player = player;
         this.loot = loot;
+        this.candyCrateAnimation = new CandyCrateAnimation_1_8(this, player.getLocation(), player);
         this.rewards = new ArrayList<>();
         for (LootItem lootItem : loot.getLootTable().generateRewards(loot.getAmountOfRewards()))
             this.rewards.add(lootItem.getItem());
@@ -41,7 +43,7 @@ public class CandyCrateProcess implements LootProcess {
     @Nullable
     @Override
     public Animation getAnimation() {
-        return null;
+        return candyCrateAnimation;
     }
 
     @NotNull

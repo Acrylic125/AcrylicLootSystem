@@ -1,6 +1,0 @@
-name: LootVersion_1_8
-version: ${project.version}
-main: com.acrylic.lootversion_1_8.LootVersion_1_8
-api-version: 1.16
-authors: [ Acrylic ]
-description: 1.8 Module.

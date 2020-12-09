@@ -1,12 +1,9 @@
 package com.acrylic.universalloot.preview;
 
-import com.acrylic.universal.events.EventBuilder;
-import com.acrylic.universal.gui.InventoryBuilder;
 import com.acrylic.universal.gui.PrivateGUIBuilder;
-import com.acrylic.universal.gui.paginated.PaginatedGUI;
-import com.acrylic.universal.gui.templates.MiddleGUITemplate;
 import com.acrylic.universalloot.Loot;
-import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public interface LootPreview {
@@ -15,5 +12,10 @@ public interface LootPreview {
     PrivateGUIBuilder getGUI();
 
     void apply(@NotNull Loot loot);
+
+    default void open(@NotNull Player player) {
+        Bukkit.broadcastMessage(getGUI() + "");
+        getGUI().open(player);
+    }
 
 }

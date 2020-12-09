@@ -3,6 +3,7 @@ package com.acrylic.candy;
 import com.acrylic.universalloot.Loot;
 import com.acrylic.universalloot.lootopener.LootOpener;
 import com.acrylic.universalloot.lootopener.LootProcess;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,7 +29,9 @@ public class CandyCrateOpener implements LootOpener {
 
     @Override
     public void open(@NotNull Player player) {
-
+        Bukkit.broadcastMessage("E");
+        generateLootProcess(player);
+        player.closeInventory();
     }
 
     @Nullable
